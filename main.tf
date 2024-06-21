@@ -115,7 +115,7 @@ resource "azurerm_network_security_rule" "vm-public-ssh-access" {
   source_port_range           = "*"
   destination_port_range      = 22
   source_address_prefix       = "*"
-  destination_address_prefix  = azurerm_linux_virtual_machine.public_vm.public_ip_address
+  destination_address_prefix  = azurerm_linux_virtual_machine.public_vm.private_ip_address
   resource_group_name         = azurerm_resource_group.public_vm_resource_group.name
   network_security_group_name = azurerm_network_security_group.vm_sg_ssh.name
 }

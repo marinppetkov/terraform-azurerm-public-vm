@@ -37,3 +37,6 @@ terraform.rc
 key*
 # ignore version
 .terraform.lock.hcl
+# other
+*log*
+*sh
