@@ -12,7 +12,7 @@ variable "enable_data_disk" {
 }
 
 variable "data_disks" {
-  type    = map(any) # Dynamic map or map(any)
+  type    = map # Dynamic map or map(any)
   default = {}
 }
 

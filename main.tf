@@ -91,7 +91,7 @@ resource "azurerm_virtual_machine_data_disk_attachment" "data_disk_attachment" {
   for_each           = var.data_disks
   managed_disk_id    = azurerm_managed_disk.data_disk[each.key].id
   virtual_machine_id = azurerm_linux_virtual_machine.public_vm.id
-  lun                = "10"
+  lun                = each.value.lun
   caching            = "ReadWrite"
 }
 
