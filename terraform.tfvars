@@ -1,3 +1,7 @@
+resource_group_name = "marin-tests"
+
+location = "West Europe"
+
 data_disks = {
   disk01 = {
     name         = "disk1"
