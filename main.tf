@@ -84,7 +84,6 @@ resource "azurerm_managed_disk" "data_disk" {
   storage_account_type = "Standard_LRS"
   create_option        = "Empty"
   disk_size_gb         = each.value.disk_size_gb
-  depends_on           = [azurerm_linux_virtual_machine.public_vm] #Set dependency for future automation for volume mount
 }
 
 resource "azurerm_virtual_machine_data_disk_attachment" "data_disk_attachment" {
