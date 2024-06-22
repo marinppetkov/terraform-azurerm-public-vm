@@ -25,13 +25,13 @@ resource "azurerm_subnet" "vm_subnet" {
 }
 
 resource "azurerm_public_ip" "vm_public_ip" {
-  name                = "marin-pip"
+  name                = "vm-pip"
   resource_group_name = azurerm_resource_group.public_vm_resource_group.name
   location            = azurerm_resource_group.public_vm_resource_group.location
   allocation_method   = "Static"
 }
 resource "azurerm_network_interface" "public" {
-  name                = "marin-public-nic"
+  name                = "vm-public-nic"
   resource_group_name = azurerm_resource_group.public_vm_resource_group.name
   location            = azurerm_resource_group.public_vm_resource_group.location
 
