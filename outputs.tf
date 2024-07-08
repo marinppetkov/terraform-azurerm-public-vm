@@ -8,3 +8,4 @@ output "public_VM_address" {
 ## no op - successful policy for eu and us
 ## no op - successful policy set advisory mode us and eu
 ## no op - fail policy set advisory mode us and eu
+## no op - successful policy set advisory mode us and eu
