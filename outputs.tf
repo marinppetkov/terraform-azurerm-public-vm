@@ -3,4 +3,4 @@ output "public_VM_address" {
   value       = azurerm_linux_virtual_machine.public_vm.public_ip_address
 }
 
-## No op - test policy cost estimate HCP terraform US
+## No op - test policy cost estimate HCP terraform US (soft mandatory)
