@@ -34,7 +34,7 @@ override.tf.json
 terraform.rc
 
 # Ignore keys
-key*
+key
 # ignore version
 .terraform.lock.hcl
 # other
