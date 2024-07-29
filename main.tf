@@ -75,7 +75,7 @@ resource "azurerm_linux_virtual_machine" "public_vm" {
   }
 }
 
-### Data Disk
+# ### Data Disk
 resource "azurerm_managed_disk" "data_disk" {
   for_each             = var.data_disks
   name                 = each.value.name
@@ -94,28 +94,29 @@ resource "azurerm_virtual_machine_data_disk_attachment" "data_disk_attachment" {
   caching            = "ReadWrite"
 }
 
-### N-S Security
-resource "azurerm_network_security_group" "vm_sg_ssh" {
-  name                = "vm-public-ssh-access"
-  location            = azurerm_resource_group.public_vm_resource_group.location
-  resource_group_name = azurerm_resource_group.public_vm_resource_group.name
-}
-resource "azurerm_network_interface_security_group_association" "public_ssh" {
-  network_interface_id      = azurerm_network_interface.public.id
-  network_security_group_id = azurerm_network_security_group.vm_sg_ssh.id
-}
+# ### N-S Security
+# resource "azurerm_network_security_group" "vm_sg_ssh" {
+#   name                = "vm-public-ssh-access"
+#   location            = azurerm_resource_group.public_vm_resource_group.location
+#   resource_group_name = azurerm_resource_group.public_vm_resource_group.name
+# }
+# resource "azurerm_network_interface_security_group_association" "public_ssh" {
+#   network_interface_id      = azurerm_network_interface.public.id
+#   network_security_group_id = azurerm_network_security_group.vm_sg_ssh.id
+# }
 
-resource "azurerm_network_security_rule" "vm-public-ssh-access" {
-  name                        = "ssh"
-  priority                    = 110
-  direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  destination_port_range      = 22
-  source_address_prefix       = "*"
-  destination_address_prefix  = azurerm_linux_virtual_machine.public_vm.private_ip_address
-  resource_group_name         = azurerm_resource_group.public_vm_resource_group.name
-  network_security_group_name = azurerm_network_security_group.vm_sg_ssh.name
-}
+# resource "azurerm_network_security_rule" "vm-public-ssh-access" {
+#   name                        = "ssh"
+#   priority                    = 110
+#   direction                   = "Inbound"
+#   access                      = "Deny"
+#   protocol                    = "Tcp"
+#   source_port_range           = "*"
+#   destination_port_range      = 22
+#   source_address_prefix       = "*"
+#   # destination_address_prefix  = azurerm_linux_virtual_machine.public_vm.private_ip_address
+#   destination_address_prefix = azurerm_linux_virtual_machine.public_vm.public_ip_address
+#   resource_group_name         = azurerm_resource_group.public_vm_resource_group.name
+#   network_security_group_name = azurerm_network_security_group.vm_sg_ssh.name
+# }
 
