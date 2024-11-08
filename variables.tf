@@ -11,15 +11,13 @@ variable "data_disks" {
     lun          = number
   }))
   default = {
-      disk01 = {
-        name         = "disk1"
-        disk_size_gb = 10
-        lun          = 10
-      }
-      disk02 = {
-        name         = "disk2"
-        disk_size_gb = 10
-        lun          = 20
-      }
+    disk01 = {
+      name         = "disk1"
+      disk_size_gb = 10
+      lun          = 10
+    }
   }
+}
+variable "subnet_addr_space" {
+  default = "10.0.2.0/26"
 }
