@@ -17,3 +17,6 @@ This setup follows the steps below:
 ## To do 
 Update main.sh to add LUN targets dynamically.</br>
 Install Nginx server and test LB</br>
+
+### Notes
+An RSA key-pair is generated locally, so a new key pair must be created before using this code.
