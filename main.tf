@@ -68,7 +68,7 @@ resource "azurerm_linux_virtual_machine" "public_vm" {
       user        = "adminuser"
       private_key = file("./key")
       host        = self.public_ip_address
-      timeout     = "7m"
+      timeout     = "2m"
     }
   }
 
@@ -146,6 +146,8 @@ https://learn.microsoft.com/en-us/azure/virtual-network/network-security-groups-
 private IP address for inbound traffic, and before Azure translates a private IP address to a 
 public IP address for outbound traffic
 */
+
+# Because there is file provisioner we need to create this resource before the VM
 resource "azurerm_network_security_rule" "vm-public-ssh-access" {
   name                        = "AllowAnyCustom22Inbound"
   priority                    = 100
@@ -154,8 +156,9 @@ resource "azurerm_network_security_rule" "vm-public-ssh-access" {
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = 22
-  source_address_prefix       = "*"
-  destination_address_prefix  = var.subnet_addr_space
+  source_address_prefix       = azurerm_public_ip.vm_public_ip.ip_address
+  # destination_address_prefix  = var.subnet_addr_space
+  destination_address_prefix = azurerm_network_interface.public.private_ip_address
   resource_group_name         = azurerm_resource_group.public_vm_resource_group.name
   network_security_group_name = azurerm_network_security_group.vm_sg_ssh.name
 }
