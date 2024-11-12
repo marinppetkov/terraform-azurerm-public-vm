@@ -40,3 +40,4 @@ key
 # other
 *log*
 *sh
+storage_account.tf

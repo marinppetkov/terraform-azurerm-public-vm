@@ -156,7 +156,7 @@ resource "azurerm_network_security_rule" "vm-public-ssh-access" {
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = 22
-  source_address_prefix       = azurerm_public_ip.vm_public_ip.ip_address
+  source_address_prefix       = "*"
   # destination_address_prefix  = var.subnet_addr_space
   destination_address_prefix = azurerm_network_interface.public.private_ip_address
   resource_group_name         = azurerm_resource_group.public_vm_resource_group.name
