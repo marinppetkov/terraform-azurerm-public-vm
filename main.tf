@@ -12,7 +12,7 @@ resource "azurerm_resource_group" "public_vm_resource_group" {
 
 resource "azurerm_virtual_network" "vm_network" {
   name                = "vm-network"
-  address_space       = ["10.0.2.0/24"]
+  address_space       = var.vnet_cidr
   location            = azurerm_resource_group.public_vm_resource_group.location
   resource_group_name = azurerm_resource_group.public_vm_resource_group.name
 }
@@ -21,7 +21,7 @@ resource "azurerm_subnet" "vm_subnet" {
   name                 = "internal"
   resource_group_name  = azurerm_resource_group.public_vm_resource_group.name
   virtual_network_name = azurerm_virtual_network.vm_network.name
-  address_prefixes     = [var.subnet_addr_space]
+  address_prefixes     = [var.subnet_addr_space[0]]
 }
 
 resource "azurerm_public_ip" "vm_public_ip" {
@@ -44,6 +44,7 @@ resource "azurerm_network_interface" "public" {
   }
 }
 
+
 ### Virtual machine instance
 
 resource "azurerm_linux_virtual_machine" "public_vm" {
@@ -61,8 +62,8 @@ resource "azurerm_linux_virtual_machine" "public_vm" {
     public_key = file("./key.pub")
   }
   provisioner "file" {
-    source      = "./mount.sh"
-    destination = "/tmp/mount.sh"
+    source      = "./provision.sh"
+    destination = "/tmp/provision.sh"
     connection {
       type        = "ssh"
       user        = "adminuser"
@@ -87,48 +88,7 @@ resource "azurerm_linux_virtual_machine" "public_vm" {
   }
 }
 
-# ### Data Disk
-resource "azurerm_managed_disk" "data_disk" {
-  for_each             = var.data_disks
-  name                 = each.value.name
-  location             = azurerm_resource_group.public_vm_resource_group.location
-  resource_group_name  = azurerm_resource_group.public_vm_resource_group.name
-  storage_account_type = "Standard_LRS"
-  create_option        = "Empty"
-  disk_size_gb         = each.value.disk_size_gb
-}
 
-resource "azurerm_virtual_machine_data_disk_attachment" "data_disk_attachment" {
-  for_each           = var.data_disks
-  managed_disk_id    = azurerm_managed_disk.data_disk[each.key].id
-  virtual_machine_id = azurerm_linux_virtual_machine.public_vm.id
-  lun                = each.value.lun
-  caching            = "ReadWrite"
-  # timeouts {
-  #   create = 45
-  # }
-}
-### Extension
-
-resource "azurerm_virtual_machine_extension" "deployment_script" {
-  name                 = "mount_data_disks"
-  virtual_machine_id   = azurerm_linux_virtual_machine.public_vm.id
-  publisher            = "Microsoft.Azure.Extensions"
-  type                 = "CustomScript"
-  type_handler_version = "2.0"
-
-  settings = <<SETTINGS
- {
-  "commandToExecute": "sudo bash /tmp/mount.sh"
- }
-SETTINGS
-
-
-  tags = {
-    environment = "Production"
-  }
-  depends_on = [azurerm_virtual_machine_data_disk_attachment.data_disk_attachment]
-}
 ### N-S Security
 resource "azurerm_network_security_group" "vm_sg_ssh" {
   name                = "vm-public-ssh-access"
@@ -163,6 +123,27 @@ resource "azurerm_network_security_rule" "vm-public-ssh-access" {
   network_security_group_name = azurerm_network_security_group.vm_sg_ssh.name
 }
 
+### Add data disks
+module "add_data_disks" {
+  source = "./modules/azure-data_disks"
+  count = var.create_data_disks ? 1 : 0
+  vm_id = azurerm_linux_virtual_machine.public_vm.id
+  data_disks = var.data_disks
+  rg_name = azurerm_resource_group.public_vm_resource_group.name
+  location = azurerm_resource_group.public_vm_resource_group.location
+}
+
+module "create_nfs_share" {
+  source = "./modules/azure-nfs4"
+  count = var.create_nfs_share ? 1 : 0
+  storage_account_name ="fileshare"
+  nfs_share_name = "nfsdata"
+  rg_name = azurerm_resource_group.public_vm_resource_group.name
+  location = azurerm_resource_group.public_vm_resource_group.location
+  nfs_capacity =var.nfs_capacity
+  vm_nw_name = azurerm_virtual_network.vm_network.name
+  subnet_addr_space = var.subnet_addr_space[1]
+}
 ### load balancer
 # resource "azurerm_public_ip" "example" {
 #   name                = "PublicIPForLB"

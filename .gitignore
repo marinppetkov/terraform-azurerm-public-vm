@@ -39,5 +39,4 @@ key
 .terraform.lock.hcl
 # other
 *log*
-*sh
 storage_account.tf
