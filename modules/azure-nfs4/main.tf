@@ -74,9 +74,3 @@ resource "azurerm_private_dns_zone_virtual_network_link" "vm_net_zone_link" {
   private_dns_zone_name = azurerm_private_dns_zone.dns_zone.name
   virtual_network_id    = data.azurerm_virtual_network.vm_network.id
 }
-
-### Linux vm
-# sudo apt-get -y update
-# sudo apt-get install nfs-common
-# sudo mkdir -p /mount/filesharetestmarin/sharename
-# sudo mount -t nfs filesharetestmarin.file.core.windows.net:/filesharetestmarin/sharename /mount/filesharetestmarin/sharename -o vers=4,minorversion=1,sec=sys,nconnect=4
