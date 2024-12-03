@@ -32,5 +32,5 @@ variable "subnet_addr_space" {
 
 variable "nfs_capacity" {
   type = number
-  default = 100
+  default = null
 }

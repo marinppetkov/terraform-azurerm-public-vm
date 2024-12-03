@@ -2,6 +2,8 @@ resource_group_name = "my-test-rg"
 
 location = "West Europe"
 
+nfs_capacity = 100
+
 data_disks = {
   disk01 = {
     name         = "disk1"

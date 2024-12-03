@@ -126,7 +126,6 @@ resource "azurerm_network_security_rule" "vm-public-ssh-access" {
 ### Add data disks
 module "add_data_disks" {
   source = "./modules/azure-data_disks"
-  # count = var.create_data_disks ? 1 : 0
   count = var.data_disks != null ? 1 : 0
   vm_id = azurerm_linux_virtual_machine.public_vm.id
   data_disks = var.data_disks
@@ -136,7 +135,8 @@ module "add_data_disks" {
 
 module "create_nfs_share" {
   source = "./modules/azure-nfs4"
-  count = var.create_nfs_share ? 1 : 0
+  # count = var.create_nfs_share ? 1 : 0
+  count = var.nfs_capacity != null ? 1 : 0
   storage_account_name ="fileshare"
   nfs_share_name = "nfsdata"
   rg_name = azurerm_resource_group.public_vm_resource_group.name
