@@ -135,7 +135,6 @@ module "add_data_disks" {
 
 module "create_nfs_share" {
   source = "./modules/azure-nfs4"
-  # count = var.create_nfs_share ? 1 : 0
   count = var.nfs_capacity != null ? 1 : 0
   storage_account_name ="fileshare"
   nfs_share_name = "nfsdata"

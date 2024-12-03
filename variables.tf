@@ -4,11 +4,6 @@ variable "location" {
   default = "West Europe"
 }
 
-variable create_nfs_share{
-  type = bool
-  default = true
-}
-
 variable "data_disks" {
   type = map(object({
     name         = string
