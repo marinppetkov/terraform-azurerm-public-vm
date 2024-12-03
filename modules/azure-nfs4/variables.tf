@@ -22,3 +22,7 @@ variable "vm_nw_name" {
 variable "subnet_addr_space" {
   
 }
+
+variable "virtual_network_id" {
+  
+}

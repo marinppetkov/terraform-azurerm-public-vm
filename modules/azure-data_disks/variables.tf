@@ -16,11 +16,4 @@ variable "data_disks" {
     disk_size_gb = number
     lun          = number
   }))
-  default = {
-    disk01 = {
-      name         = "disk1"
-      disk_size_gb = 10
-      lun          = 10
-    }
-  }
 }

@@ -1,5 +1,5 @@
 Creating storage account with file share and private endpoint for internal connection<br>
-
+Microsoft [Docs](https://learn.microsoft.com/en-us/azure/storage/files/storage-files-quick-create-use-linux)
 Once done the nfs share should be mounted. Example script below:<br>
 ```bash
 sudo apt-get -y update

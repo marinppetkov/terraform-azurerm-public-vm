@@ -32,15 +32,10 @@ resource "azurerm_storage_share" "nfs_share" {
 
 }
 
-data "azurerm_virtual_network" "vm_network" {
-  name                = var.vm_nw_name
-  resource_group_name = var.rg_name
-}
-
 resource "azurerm_subnet" "sa_subnet" {
   name                 = "storageAccSubnet"
   resource_group_name  = var.rg_name
-  virtual_network_name = data.azurerm_virtual_network.vm_network.name
+  virtual_network_name = var.vm_nw_name
   address_prefixes     = [var.subnet_addr_space]
   private_endpoint_network_policies = "Enabled" ## Will use acl to filter traffic to the PE
   service_endpoints    = ["Microsoft.Storage"]
@@ -72,5 +67,5 @@ resource "azurerm_private_dns_zone_virtual_network_link" "vm_net_zone_link" {
   name                  = "vm_net_zone_link"
   resource_group_name   = var.rg_name
   private_dns_zone_name = azurerm_private_dns_zone.dns_zone.name
-  virtual_network_id    = data.azurerm_virtual_network.vm_network.id
+  virtual_network_id    = var.virtual_network_id
 }

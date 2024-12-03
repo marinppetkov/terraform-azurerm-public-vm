@@ -4,11 +4,6 @@ variable "location" {
   default = "West Europe"
 }
 
-variable "create_data_disks" {
-  type = bool
-  default = true
-}
-
 variable create_nfs_share{
   type = bool
   default = true
@@ -20,13 +15,7 @@ variable "data_disks" {
     disk_size_gb = number
     lun          = number
   }))
-  default = {
-    disk01 = {
-      name         = "disk1"
-      disk_size_gb = 10
-      lun          = 10
-    }
-  }
+  default = null
 }
 
 variable vnet_cidr{
