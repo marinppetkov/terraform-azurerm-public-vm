@@ -14,7 +14,10 @@ variable "location" {
 
 variable "nfs_capacity" {
   type = number
-  default = 100
+    validation {
+    condition = var.nfs_capacity >= 100
+    error_message = "Minimum capacity is 100GB"
+  }
 }
 
 variable "vm_nw_name" {
