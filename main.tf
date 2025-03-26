@@ -53,6 +53,9 @@ resource "azurerm_linux_virtual_machine" "public_vm" {
   location            = azurerm_resource_group.public_vm_resource_group.location
   size                = "Standard_F2"
   admin_username      = "adminuser"
+  # tags = {
+  #   env = "test"
+  # }
   network_interface_ids = [
     azurerm_network_interface.public.id
   ]
@@ -82,8 +85,6 @@ resource "azurerm_linux_virtual_machine" "public_vm" {
     publisher = "Canonical"
     offer     = "0001-com-ubuntu-server-jammy"
     sku       = "22_04-lts"
-    # offer   = "0001-com-ubuntu-server-focal"
-    # sku     = "20_04-lts"
     version = "latest"
   }
 }
@@ -108,6 +109,13 @@ public IP address for outbound traffic
 */
 
 # Because there is file provisioner we need to create this resource before the VM
+## Getting local ip and modifyig the string if var source_address_prefix is not provided 
+
+data http source_public_ip {
+  count = var.source_address_prefix != null ? 0 : 1
+  url ="https://ifconfig.me/all.json"
+}
+
 resource "azurerm_network_security_rule" "vm-public-ssh-access" {
   name                        = "AllowAnyCustom22Inbound"
   priority                    = 100
@@ -116,13 +124,27 @@ resource "azurerm_network_security_rule" "vm-public-ssh-access" {
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = 22
-  source_address_prefix       = "*"
+  source_address_prefix       = var.source_address_prefix != null ? var.source_address_prefix : join("", ["${jsondecode(data.http.source_public_ip[0].response_body)["ip_addr"]}", "/32"])
   # destination_address_prefix  = var.subnet_addr_space
   destination_address_prefix = azurerm_network_interface.public.private_ip_address
   resource_group_name         = azurerm_resource_group.public_vm_resource_group.name
   network_security_group_name = azurerm_network_security_group.vm_sg_ssh.name
 }
 
+# resource "azurerm_network_security_rule" "deny_hcp" {
+#   name                        = "DenyHCP"
+#   priority                    = 110
+#   direction                   = "Outbound"
+#   access                      = "Deny"
+#   protocol                    = "*"
+#   source_port_range           = "*"
+#   destination_port_range      = 443
+#   source_address_prefix       = azurerm_network_interface.public.private_ip_address
+#   # destination_address_prefix  = var.subnet_addr_space
+#   destination_address_prefix = "*"
+#   resource_group_name         = azurerm_resource_group.public_vm_resource_group.name
+#   network_security_group_name = azurerm_network_security_group.vm_sg_ssh.name
+# }
 ### Add data disks
 module "add_data_disks" {
   source = "./modules/azure-data_disks"
@@ -145,64 +167,8 @@ module "create_nfs_share" {
   virtual_network_id = azurerm_virtual_network.vm_network.id
   subnet_addr_space = var.subnet_addr_space[1]
 }
-### load balancer
-# resource "azurerm_public_ip" "example" {
-#   name                = "PublicIPForLB"
-#   resource_group_name = azurerm_resource_group.public_vm_resource_group.name
-#   location            = azurerm_resource_group.public_vm_resource_group.location
-#   allocation_method   = "Static"
-#   # sku = "Standard" ### This is for the nat gateway
-# }
 
-# resource "azurerm_lb" "example" {
-#   name                = "TestLoadBalancer"
-#   resource_group_name = azurerm_resource_group.public_vm_resource_group.name
-#   location            = azurerm_resource_group.public_vm_resource_group.location
-#   # sku = "Standard" ### This is for the nat gateway
-#   frontend_ip_configuration {
-#     name                 = "PublicIPAddress"
-#     public_ip_address_id = azurerm_public_ip.example.id
-#   }
+# module "nfs4_file_upload" {
+#   source = "./modules/azure-nfs4-file_upload"
+#   nfs_share_id = module.create_nfs_share[0].nfs_share_id
 # }
-
-# resource "azurerm_lb_backend_address_pool" "example" {
-#   loadbalancer_id = azurerm_lb.example.id
-#   name            = "acctestpool"
-# }
-
-# resource "azurerm_network_interface_backend_address_pool_association" "example" {
-#   network_interface_id    = azurerm_network_interface.public.id
-#   ip_configuration_name   = azurerm_network_interface.public.ip_configuration[0].name
-#   backend_address_pool_id = azurerm_lb_backend_address_pool.example.id
-# }
-
-# resource "azurerm_lb_rule" "lb_rules" {
-#   loadbalancer_id                = azurerm_lb.example.id
-#   name                           = "LBRule"
-#   protocol                       = "Tcp"
-#   frontend_port                  = 80
-#   backend_port                   = 80
-#   frontend_ip_configuration_name = azurerm_lb.example.frontend_ip_configuration[0].name
-#   backend_address_pool_ids       = [azurerm_lb_backend_address_pool.example.id]
-# }
-# output lb_ip {
-#   value = azurerm_public_ip.example.ip_address
-# }
-# https://learn.microsoft.com/en-us/azure/load-balancer/load-balancer-outbound-connections#2-associate-a-nat-gateway-to-the-subnet
-# resource "azurerm_nat_gateway" "example" {
-#   name                = "example-NatGateway"
-#   resource_group_name = azurerm_resource_group.public_vm_resource_group.name
-#   location            = azurerm_resource_group.public_vm_resource_group.location
-#   sku_name            = "Standard"
-# }
-
-# resource "azurerm_nat_gateway_public_ip_association" "example" {
-#   nat_gateway_id       = azurerm_nat_gateway.example.id
-#   public_ip_address_id = azurerm_public_ip.vm_public_ip.id
-# }
-
-# resource "azurerm_subnet_nat_gateway_association" "example" {
-#   subnet_id      = azurerm_subnet.vm_subnet.id
-#   nat_gateway_id = azurerm_nat_gateway.example.id
-# }
-### Must solve issue https://stackoverflow.com/questions/68036097/azure-loadbalancer-can-the-virtual-machines-in-backendpool-retain-public-ip

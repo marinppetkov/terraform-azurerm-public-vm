@@ -29,3 +29,7 @@ variable "nfs_capacity" {
   type = number
   default = null
 }
+
+variable "source_address_prefix" {
+  default = null
+}
